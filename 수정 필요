@@ -1,0 +1,73 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import matplotlib.font_manager as fm
+data = pd.read_csv("D:\\물\\feeling_tags.csv")
+del data['id']
+del data['created_at']
+font_path = 'C:\\Windows\\Fonts\\gulim'  # Update with the correct path to your font file
+font_prop = fm.FontProperties(fname=font_path)
+
+colors = ['navy','darkgreen','maroon','purple','olive','teal','grey','orange']
+weight = [0.5,2,0.4,4,5,2,3,1.4]
+origin = np.array([0, 0])
+
+theta = np.linspace(0, 2*np.pi, 8, endpoint=False)
+
+x = np.cos(theta)
+y = np.sin(theta)
+
+emotion = []
+
+plt.figure(figsize=(20, 20))
+plt.axhline(y=0, color='k', linestyle='--', alpha=0.5)
+plt.axvline(x=0, color='k', linestyle='--', alpha=0.5)
+
+circle = plt.Circle((0, 0), 1, fill=False)
+plt.gca().add_artist(circle)
+
+for i in range(len(theta)):
+    vector = np.array([x[i],y[i]])
+    emotion.append(vector)
+    emotion[i] = emotion[i] * weight[i]
+    plt.arrow(0, 0, emotion[i][0], emotion[i][1], head_width=0.09, head_length=0.1, fc=colors[i], ec=colors[i])
+
+plt.xlim(-5, 5)
+plt.ylim(-5, 5)
+plt.title('The base of feelings')
+plt.gca().set_aspect('equal', adjustable='box')
+plt.grid(True)
+
+for i in range(8):
+    j = 1
+    while i+j<8:
+
+        point = emotion[i] + emotion[i+j]
+        plt.fill([origin[0], emotion[i][0], point[0], emotion[i+j][0]], 
+             [origin[1], emotion[i][1], point[1], emotion[i+j][1]], 
+             alpha=0.3)
+        j = j+1
+tag_to_vector = {
+    'joy': emotion[0],
+    'anticipation': emotion[1],
+    'anger': emotion[2],
+    'disgust': emotion[3],
+    'sadness': emotion[4],
+    'surprise': emotion[5],
+    'fear': emotion[6],
+    'trust': emotion[7]
+}
+
+# Plot data points based on tags
+for idx, row in data.iterrows():
+    tags = row['tags'].split(',')  # Assuming tags are comma-separated
+    text_position = np.array([0.0, 0.0])
+    for tag in tags:
+        if tag in tag_to_vector:
+            text_position += tag_to_vector[tag]
+    text_position /= len(tags)  # Average position if multiple tags
+
+    plt.text(text_position[0], text_position[1], row['content'], fontsize=8, ha='center', va='center')
+print(tags)
+plt.show()
+plt.show()
