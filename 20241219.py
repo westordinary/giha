@@ -117,6 +117,6 @@ legend_elements = [
     for i in range(len(emotion_labels))
 ]
 
-ax.legend(handles=legend_elements, loc='upper right', fontsize=12, title="Emotions")
+ax.legend(handles=legend_elements, loc='upper right', fontsize=7, title="Emotions")
 
 plt.show()
