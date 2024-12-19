@@ -47,10 +47,11 @@ for i in range(8):
 
     while i + j < 8:
         point = emotion[i] + emotion[i + j]
-        ax.fill([origin[0], emotion[i][0], point[0], emotion[i+j][0]], 
-             [origin[1], emotion[i][1], point[1], emotion[i+j][1]], 
-             alpha=0.3)
-        j = j + 1
+        ax.fill([origin[0], emotion[i][0], point[0], emotion[i+j][0]],
+                [origin[1], emotion[i][1], point[1], emotion[i+j][1]],
+                alpha=0.3)
+
+        j += 1
 
 tag_to_vector = {
     'joy': emotion[0],
@@ -74,49 +75,66 @@ for idx, row in data.iterrows():
     count = 0
     for tag in tags:
         if tag in tag_to_vector:
-            # print(tag_to_vector[tag])
             text_position += tag_to_vector[tag]
             count += 1
+
     if count > 0:
         text_position /= count
 
     text_positions.append(text_position)
     text_contents.append(row['content'])
 
+# 점 찍기
+point_colors = []
+for idx, row in data.iterrows():
+    tags = json.loads(row['tags'])
+    tag_colors = [colors[list(tag_to_vector.keys()).index(tag)] for tag in tags if tag in tag_to_vector]
+    point_color = tag_colors[0] if tag_colors else 'black'
+    point_colors.append(point_color)
+
+text_positions_array = np.array(text_positions)
+ax.scatter(text_positions_array[:, 0], text_positions_array[:, 1],
+           color=point_colors, s=20, alpha=0.7, edgecolor='black')
+
 annot = ax.annotate("", xy=(0, 0), xytext=(10, 10), textcoords="offset points",
                     bbox=dict(boxstyle="round", fc="w"),
-                    arrowprops=dict(arrowstyle="->"))
+                    arrowprops=dict(arrowstyle='->'))
 annot.set_visible(False)
 
-def update_annot(ind):
+def update_annot(ind: int):
     pos = text_positions[ind]
     annot.xy = pos
     text = text_contents[ind]
     annot.set_text(text)
     annot.get_bbox_patch().set_alpha(0.8)
 
+# 마우스 포인터를 대면 실행되는 함수
 def hover(event):
     vis = annot.get_visible()
+
     if event.inaxes == ax:
         for i, pos in enumerate(text_positions):
             distance = np.sqrt((event.xdata - pos[0]) ** 2 + (event.ydata - pos[1]) ** 2)
 
-            if distance < 0.3:
+            if distance < 0.5:
                 update_annot(i)
                 annot.set_visible(True)
                 fig.canvas.draw_idle()
                 return
+
     if vis:
         annot.set_visible(False)
         fig.canvas.draw_idle()
 
+# 모션 이벤트
 fig.canvas.mpl_connect("motion_notify_event", hover)
 
+# 범례
 legend_elements = [
-    Line2D([0], [0], color=colors[i], lw=2, label=emotion_labels[i]) 
+    Line2D([0], [0], color=colors[i], lw=1.75, label=emotion_labels[i]) 
     for i in range(len(emotion_labels))
 ]
 
-ax.legend(handles=legend_elements, loc='upper right', fontsize=7, title="Emotions")
+ax.legend(handles=legend_elements, loc='upper right', fontsize=8, title="Emotions")
 
 plt.show()
