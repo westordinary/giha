@@ -2,8 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import json
+from matplotlib.lines import Line2D
 
-data = pd.read_csv("./feeling_tags.csv")
+data = pd.read_csv("./data.csv")
 del data['id']
 del data['created_at']
 
@@ -61,6 +62,7 @@ tag_to_vector = {
     'fear': emotion[6],
     'trust': emotion[7]
 }
+emotion_labels = list(tag_to_vector.keys())
 
 text_positions = []
 text_contents = []
@@ -72,7 +74,7 @@ for idx, row in data.iterrows():
     count = 0
     for tag in tags:
         if tag in tag_to_vector:
-            print(tag_to_vector[tag])
+            # print(tag_to_vector[tag])
             text_position += tag_to_vector[tag]
             count += 1
     if count > 0:
@@ -109,5 +111,12 @@ def hover(event):
         fig.canvas.draw_idle()
 
 fig.canvas.mpl_connect("motion_notify_event", hover)
+
+legend_elements = [
+    Line2D([0], [0], color=colors[i], lw=2, label=emotion_labels[i]) 
+    for i in range(len(emotion_labels))
+]
+
+ax.legend(handles=legend_elements, loc='upper right', fontsize=12, title="Emotions")
 
 plt.show()
