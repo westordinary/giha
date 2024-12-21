@@ -116,7 +116,7 @@ def hover(event):
         for i, pos in enumerate(text_positions):
             distance = np.sqrt((event.xdata - pos[0]) ** 2 + (event.ydata - pos[1]) ** 2)
 
-            if distance < 0.5:
+            if distance < 0.3:
                 update_annot(i)
                 annot.set_visible(True)
                 fig.canvas.draw_idle()
